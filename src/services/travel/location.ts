@@ -1,2 +1,30 @@
-const cities:Record<string,string>={mumbai:'BOM',bombay:'BOM',delhi:'DEL','new delhi':'DEL',pune:'PNQ',bangalore:'BLR',bengaluru:'BLR',goa:'GOI',chennai:'MAA',kolkata:'CCU',hyderabad:'HYD',dubai:'DXB',london:'LON','new york':'NYC',singapore:'SIN'};
-export function flightLocation(value:string){const key=value.toLowerCase().trim().replace(/,?\s+(india|usa|united states|uk|united kingdom|uae)$/,'').replace(/ airport$/,'');return cities[key]??(Object.values(cities).includes(value.toUpperCase())?value.toUpperCase():undefined)}
+const cities: Record<string, string> = {
+  mumbai: "BOM",
+  bombay: "BOM",
+  delhi: "DEL",
+  "new delhi": "DEL",
+  pune: "PNQ",
+  bangalore: "BLR",
+  bengaluru: "BLR",
+  goa: "GOI",
+  chennai: "MAA",
+  kolkata: "CCU",
+  hyderabad: "HYD",
+  dubai: "DXB",
+  london: "LON",
+  "new york": "NYC",
+  singapore: "SIN",
+};
+export function flightLocation(value: string) {
+  const key = value
+    .toLowerCase()
+    .trim()
+    .replace(/,?\s+(india|usa|united states|uk|united kingdom|uae)$/, "")
+    .replace(/ airport$/, "");
+  return (
+    cities[key] ??
+    (Object.values(cities).includes(value.toUpperCase())
+      ? value.toUpperCase()
+      : undefined)
+  );
+}
