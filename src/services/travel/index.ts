@@ -66,7 +66,7 @@ export function createTravelAssistant(
   };
 }
 export const runTravelAssistant = createTravelAssistant(
-  config.DEMO_MODE
+  (config.TRAVEL_STORE === 'file' || (config.TRAVEL_STORE === 'auto' && config.DEMO_MODE))
     ? new FileTravelStore(config.TRAVEL_DATA_FILE)
     : new SupabaseTravelStore(),
 );

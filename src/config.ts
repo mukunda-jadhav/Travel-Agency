@@ -4,6 +4,7 @@ import { z } from 'zod';
 const schema = z.object({
   TRAVEL_TIMEZONE:z.string().default('Asia/Kolkata').refine(v=>{try{new Intl.DateTimeFormat('en',{timeZone:v});return true}catch{return false}},'Invalid timezone'),
   TRAVEL_SESSION_HOURS:z.coerce.number().positive().default(24), TRAVEL_DATA_FILE:z.string().default('data/travel.json'),
+  TRAVEL_STORE:z.enum(['auto','file','supabase']).default('auto'),
   NODE_ENV: z.enum(['development','test','production']).default('development'), PORT: z.coerce.number().default(3000), DEMO_MODE:z.string().default('true').transform(v=>v==='true'),
   PUBLIC_BASE_URL: z.string().url().default('http://localhost:3000'), APP_NAME: z.string().default('VoyageZero'), DEFAULT_CURRENCY: z.string().length(3).default('USD'),
   GOOGLE_API_KEY: z.string().default('demo-key'), GEMINI_MODEL: z.string().default('gemini-3.6-flash'),

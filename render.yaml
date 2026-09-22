@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: travel-agency
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 22
+      - key: DEMO_MODE
+        value: "true"
+      - key: TRAVEL_STORE
+        value: supabase
+      - key: DEFAULT_CURRENCY
+        value: INR
+      - key: TRAVEL_TIMEZONE
+        value: Asia/Kolkata
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_APP_SECRET
+        sync: false
