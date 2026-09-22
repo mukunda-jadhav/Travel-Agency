@@ -42,6 +42,7 @@ export async function advance(session:Session,input:string,x:Extraction,provider
   if(patch.pickupTime){const resolved=resolveDate(patch.pickupTime,today);if(!resolved||resolved<today)return finish('When should the cab arrive? Please give today, tomorrow, or a date as YYYY-MM-DD.');patch.pickupTime=`${resolved}${input.match(/\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/i)?.[0]?` ${input.match(/\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/i)![0]}`:''} (${timezone})`}
   if(x.refinement==='cheaper'&&previous)patch.maxPrice=Math.min(s.searchCriteria.maxPrice??Infinity,previous.price-1);
   if(x.refinement==='later'&&previous?.departureTime)patch.afterHour=Number(previous.departureTime.slice(11,13));
+  if(patch.checkOut&&!patch.nights)delete s.searchCriteria.nights;
   Object.assign(s.searchCriteria,patch);
   const c=s.searchCriteria;
   if(c.checkIn&&c.nights)c.checkOut=addDays(c.checkIn,c.nights);

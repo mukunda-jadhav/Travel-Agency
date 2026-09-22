@@ -12,9 +12,9 @@ export function localIntent(input:string,s:Session):Extraction {
   if(/^help\b/i.test(t))return {...x,intent:'help'};
   if(/^(try again|retry|search again)$/i.test(t))return {...x,intent:'modify_search'};
   if(/^(yes(?: book it)?|book (?:it|this(?: flight|hotel|cab)?)(?: for me)?|go ahead|confirm|sure|okay|ok)[!. ]*$/i.test(t))return {...x,intent:'accept_recommendation'};
-  if(/\b(flight|fly|flying)\b/.test(lower))x.travelType='flight';
-  else if(/\b(hotel|stay|room)\b/.test(lower))x.travelType='hotel';
-  else if(/\b(cab|taxi|ride)\b/.test(lower))x.travelType='cab';
+  if(/\b(flights?|fly|flying)\b/.test(lower))x.travelType='flight';
+  else if(/\b(hotels?|stays?|rooms?)\b/.test(lower))x.travelType='hotel';
+  else if(/\b(cabs?|taxis?|rides?)\b/.test(lower))x.travelType='cab';
   if(x.travelType)x.intent=`${x.travelType}_search`;
   const type=x.travelType??s.travelType;
   const end='(?=\\s+(?:tomorrow|today|tonight|this|next|on|for|under|at|with|in the|\\d{4}-)|[.!?]|$)';
@@ -25,8 +25,14 @@ export function localIntent(input:string,s:Session):Extraction {
   if(type==='hotel'){const city=t.match(new RegExp('\\bin\\s+(.+?)'+end,'i'));if(city)x.criteria.location=city[1]!.trim()}
   const near=t.match(new RegExp('\\b(?:near|closer to)\\s+(.+?)'+end,'i'));if(near)x.criteria.area=near[1]!.trim();
   const dates=t.match(datePhrase)??[];
-  if(dates[0]){x.criteria[type==='hotel'?'checkIn':type==='cab'?'pickupTime':'departureDate']=dates[0];if(dates[1])x.criteria[type==='hotel'?'checkOut':'returnDate']=dates[1]}
-  const nights=t.match(/(\d+)\s*nights?/i);if(nights)x.criteria.nights=Number(nights[1]);
+  if(dates[0]){
+    const sameTrip=!x.travelType||x.travelType===s.travelType;
+    const pendingDate=sameTrip&&['checkIn','checkOut','departureDate','returnDate','pickupTime'].includes(s.pendingField??'')?s.pendingField as 'checkIn'|'checkOut'|'departureDate'|'returnDate'|'pickupTime':undefined;
+    const explicitField=type==='hotel'&&/check[ -]?out/i.test(t)?'checkOut':type==='hotel'&&/check[ -]?in/i.test(t)?'checkIn':type==='flight'&&/return(?:ing)?\s+(?:on\s+)?/i.test(t)&&dates.length===1?'returnDate':undefined;
+    const field=explicitField??(dates.length===1?pendingDate:undefined)??(type==='hotel'?'checkIn':type==='cab'?'pickupTime':'departureDate');
+    x.criteria[field]=dates[0];if(dates[1])x.criteria[type==='hotel'?'checkOut':'returnDate']=dates[1];
+  }
+  const nights=t.match(/\b(\d+|one|two|three|four|five|six|seven)\s*nights?\b/i);if(nights)x.criteria.nights=Number(nights[1])||({one:1,two:2,three:3,four:4,five:5,six:6,seven:7} as Record<string,number>)[nights[1]!.toLowerCase()];
   const budget=t.match(/(?:under|below|budget(?: of)?|up to)\s*[₹$]?\s*([\d,]+)/i);if(budget)x.criteria.maxPrice=Number(budget[1]!.replaceAll(',',''));
   const count=t.match(/(\d+)\s*(?:passengers?|adults?|guests?)/i);if(count)x.criteria[type==='hotel'?'guests':'passengers']=Number(count[1]);
   const rooms=t.match(/(\d+)\s*rooms?/i);if(rooms)x.criteria.rooms=Number(rooms[1]);

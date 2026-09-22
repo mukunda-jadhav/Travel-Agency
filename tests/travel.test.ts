@@ -84,3 +84,33 @@ describe('validation',()=>{
  it('rejects malformed intent and strips arbitrary fields',()=>{expect(extractionSchema.safeParse({intent:'pay'}).success).toBe(false);expect(extractionSchema.parse({intent:'unknown',execute:'pay'})).not.toHaveProperty('execute');expect(extractionSchema.safeParse({intent:'flight_search',criteria:{passengers:-1}}).success).toBe(false)});
  it('rejects malformed Meta payloads/signatures',()=>{expect(messagesFrom(null)).toEqual([]);expect(messagesFrom({entry:'bad'})).toEqual([]);expect(validMetaSignature(Buffer.from('{}'),'bad')).toBe(false)});
 });
+
+
+describe('WhatsApp natural date follow-ups',()=>{
+ const clock=new Date('2026-09-22T12:30:00Z');
+ const turn=(s:Session,text:string)=>advance(s,text,localIntent(text,s),providers,clock);
+ it.each(['Tomorrow 8am','Tomorrow 8 am','Tomorrow','24 Sep'])('fills checkout from %s without overwriting check-in',async(checkout)=>{
+   let r=await turn(newSession('demo-user',clock),'Hotels in pune');
+   expect(r.session.pendingField).toBe('checkIn');
+   r=await turn(r.session,'Tonight 8 pm');expect(r.session.pendingField).toBe('checkOut');
+   r=await turn(r.session,checkout);
+   expect(r.session.status).toBe('awaiting_confirmation');
+   expect(r.session.searchCriteria.checkIn).toBe('2026-09-22');
+   expect(r.session.searchCriteria.checkOut).toBe(checkout==='24 Sep'?'2026-09-24':'2026-09-23');
+ });
+ it('understands one night while waiting for checkout',async()=>{
+   let r=await turn(newSession('demo-user',clock),'Hotels in pune');r=await turn(r.session,'Tonight 8 pm');
+   r=await turn(r.session,'I want hotel for 2 days one night');
+   expect(r.session.status).toBe('awaiting_confirmation');expect(r.session.searchCriteria.checkOut).toBe('2026-09-23');
+   r=await turn(r.session,'check out 24 Sep');expect(r.session.searchCriteria.checkOut).toBe('2026-09-24');
+ });
+ it('fills a missing return date without changing departure',async()=>{
+   let r=await turn(newSession('demo-user',clock),'round trip flights from Mumbai to Delhi tomorrow');
+   expect(r.session.pendingField).toBe('returnDate');r=await turn(r.session,'24 Sep');
+   expect(r.session.status).toBe('awaiting_confirmation');expect(r.session.searchCriteria.departureDate).toBe('2026-09-23');expect(r.session.searchCriteria.returnDate).toBe('2026-09-24');
+ });
+ it('validates named calendar dates',()=>{
+   expect(resolveDate('24 Sep','2026-09-22')).toBe('2026-09-24');expect(resolveDate('24 September 2027','2026-09-22')).toBe('2027-09-24');
+   expect(resolveDate('31 Sep','2026-09-22')).toBeUndefined();expect(resolveDate('29 Feb 2027','2026-09-22')).toBeUndefined();
+ });
+});
