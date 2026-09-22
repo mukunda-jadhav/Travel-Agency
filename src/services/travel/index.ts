@@ -3,6 +3,7 @@ import { advance } from './conversation.js';
 import { extractIntent } from './intent.js';
 import { providers } from './providers.js';
 import { FileTravelStore, SupabaseTravelStore, type TravelStore } from './store.js';
+import { handleBookingCommand } from './commands.js';
 import { newSession } from './types.js';
 
 export function createTravelAssistant(store:TravelStore,dependencies={extractIntent,providers},clock=()=>new Date()) {
@@ -15,6 +16,8 @@ export function createTravelAssistant(store:TravelStore,dependencies={extractInt
       const now=clock();let session=await store.load(userId);let expired=false;
       if(session&&now.getTime()-Date.parse(session.lastUpdatedAt)>config.TRAVEL_SESSION_HOURS*3600000){session=undefined;expired=true}
       session??=newSession(userId,now);
+      const command=await handleBookingCommand(store,session,input,now);
+      if(command){await store.commit(userId,eventId,command);return command.reply}
       const extraction=await dependencies.extractIntent(input,session);
       const turn=await advance(session,input,extraction,dependencies.providers,now,config.TRAVEL_TIMEZONE);
       if(expired)turn.reply='Your previous search expired. '+turn.reply;

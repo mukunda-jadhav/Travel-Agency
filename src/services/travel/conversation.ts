@@ -28,7 +28,7 @@ export async function advance(session:Session,input:string,x:Extraction,provider
     if(!s.approved||!s.recommendedOption)return finish('Please select an option first.');
     const id=`DEMO-${{flight:'FLT',hotel:'HTL',cab:'CAB'}[s.travelType]}-${randomUUID().slice(0,8).toUpperCase()}`;
     s.status='booked';s.bookingId=id;s.pendingField=undefined;s.approved=false;
-    return {...finish(`Demo booking confirmed!\n${id}\n${s.recommendedOption.name}\n\nNo payment was taken and no real reservation was made.`),booking:{bookingId:id,type:s.travelType,status:'confirmed_demo',userId:s.userId,selectedOption:s.recommendedOption,travelerDetails:s.bookingDetails,createdAt:now.toISOString()}};
+    return {...finish(`Demo booking confirmed!\n${id}\n${s.recommendedOption.name}\n\nNo payment was taken and no real reservation was made.\n\nSend /status ${id}, /voucher ${id}, or /cancel ${id}.`),booking:{bookingId:id,type:s.travelType,status:'confirmed_demo',userId:s.userId,selectedOption:s.recommendedOption,travelerDetails:s.bookingDetails,createdAt:now.toISOString()}};
   }
   if(x.intent==='unknown')return finish(s.pendingField?questions[s.pendingField]!: 'Would you like to change your search, demo-book the option, or cancel?');
   if(s.status==='booked'&&!Object.keys(x.criteria).length)return finish(`Your demo booking ${s.bookingId} is confirmed. Tell me your next travel request.`);

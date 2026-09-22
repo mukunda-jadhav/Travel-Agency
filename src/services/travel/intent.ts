@@ -29,6 +29,7 @@ export function localIntent(input:string,s:Session):Extraction {
   const nights=t.match(/(\d+)\s*nights?/i);if(nights)x.criteria.nights=Number(nights[1]);
   const budget=t.match(/(?:under|below|budget(?: of)?|up to)\s*[₹$]?\s*([\d,]+)/i);if(budget)x.criteria.maxPrice=Number(budget[1]!.replaceAll(',',''));
   const count=t.match(/(\d+)\s*(?:passengers?|adults?|guests?)/i);if(count)x.criteria[type==='hotel'?'guests':'passengers']=Number(count[1]);
+  const rooms=t.match(/(\d+)\s*rooms?/i);if(rooms)x.criteria.rooms=Number(rooms[1]);
   const time=lower.match(/\b(morning|afternoon|evening|night)\b/);if(time)x.criteria.time=time[1] as 'morning';
   if(/\b(direct|non.?stop)\b/.test(lower))x.criteria.direct=true;
   if(/round.?trip|return flight/.test(lower))x.criteria.tripType='round_trip';
@@ -52,7 +53,7 @@ export function localIntent(input:string,s:Session):Extraction {
 
 export async function extractIntent(input:string,s:Session):Promise<Extraction> {
   const fallback=()=>localIntent(input,s);
-  if(!config.GOOGLE_API_KEY||config.GOOGLE_API_KEY==='demo-key')return fallback();
+  if(config.DEMO_MODE||!config.GOOGLE_API_KEY||config.GOOGLE_API_KEY==='demo-key')return fallback();
   try {
     const model=new ChatGoogleGenerativeAI({apiKey:config.GOOGLE_API_KEY,model:config.GEMINI_MODEL,temperature:0,maxRetries:0});
     const result=await model.withStructuredOutput(extractionSchema).invoke([

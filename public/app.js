@@ -1,19 +1,34 @@
-const chat=document.querySelector('#chat'),input=document.querySelector('#message'),typing=document.querySelector('#typing'),modal=document.querySelector('#checkout');
-let step=0,booking=null;
-const now=()=>new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-function bubble(html,who='bot',actions=[]){const el=document.createElement('div');el.className=`msg ${who}`;el.innerHTML=`${html}<span class="time">${now()} ${who==='user'?'✓✓':''}</span>`;if(actions.length){const a=document.createElement('div');a.className='actions';actions.forEach(x=>{const b=document.createElement('button');b.className=`action ${x.primary?'primary':''}`;b.textContent=x.label;b.onclick=x.run;a.appendChild(b)});el.appendChild(a)}chat.appendChild(el);chat.scrollTop=chat.scrollHeight;}
-const user=t=>bubble(t,'user');
-function bot(html,actions=[],delay=650){typing.classList.remove('hidden');setTimeout(()=>{typing.classList.add('hidden');bubble(html,'bot',actions)},delay)}
-function start(){chat.innerHTML='';step=0;booking=null;bot(`<h3>👋 Welcome to VoyageZero</h3>I'm Ava, your AI travel concierge. I can plan and book your complete journey right here.<br><br>Where would you like to go?`,[{label:'✈ Plan Dubai trip',primary:true,run:search},{label:'🏖 Surprise me',run:search}],250)}
-function search(){user('Plan a Dubai trip for me');bot(`Wonderful choice! To find the best package, I need a few details.<br><br><b>When are you travelling?</b>`,[{label:'10–15 Oct · 1 adult',primary:true,run:showSearch}]);}
-function showSearch(){user('10–15 October, from Delhi, 1 adult');bot(`Got it — searching live travel inventory…<br><br>📍 Delhi → Dubai<br>📅 10–15 October · 1 traveller`);setTimeout(()=>bot(`<h3>✈ Best flight options</h3><span class="option"><b>1 · Emirates · Non-stop</b><small>DEL 09:15 → DXB 11:25 · 3h 40m</small><br><strong>₹38,450</strong></span><span class="option"><b>2 · Air India · Non-stop</b><small>DEL 20:10 → DXB 22:30 · 3h 50m</small><br><strong>₹34,890</strong></span><span class="option"><b>3 · Vistara · 1 stop</b><small>DEL 07:20 → DXB 13:45 · 7h 55m</small><br><strong>₹31,200</strong></span>`,[{label:'Select Emirates',primary:true,run:hotels},{label:'Select Air India',run:hotels}],1100),700)}
-function hotels(e){user(e?.target?.textContent||'Select Emirates');bot(`<h3>⌂ Stays near Downtown Dubai</h3><span class="option"><b>Address Downtown · ★★★★★</b><small>Burj Khalifa view · Breakfast · Free cancellation</small><br><strong>₹41,750</strong> · 5 nights</span><span class="option"><b>Rove Downtown · ★★★★</b><small>City view · Breakfast included</small><br><strong>₹29,600</strong> · 5 nights</span>`,[{label:'Select Address Downtown',primary:true,run:cab},{label:'Select Rove Downtown',run:cab}]);}
-function cab(e){user(e?.target?.textContent||'Select Address Downtown');bot(`<h3>↗ Airport transfer</h3><span class="option"><b>DXB → Address Downtown</b><small>15.4 km · approximately 24 min</small><br><strong>₹1,220</strong> · Private sedan</span>Route and fare calculated using current road distance.`,[{label:'Add airport cab',primary:true,run:guest},{label:'Skip cab',run:guest}]);}
-function guest(e){user(e?.target?.textContent||'Add airport cab');bot(`<h3>Your package is ready</h3>✈ Emirates return flight<br>⌂ Address Downtown · 5 nights<br>↗ Private airport transfer<div class="line"><b>Total · ₹87,420</b></div>I just need the lead traveller details.`,[{label:'Use demo traveller',primary:true,run:review}]);}
-function review(){user('Arjun Mehta · Passport ready');bot(`<h3>✓ Traveller details captured</h3><b>Arjun Mehta</b><br>Adult · Passport ending 4821<br>arjun@example.com<div class="line">Everything looks good. Continue to secure Stripe test checkout?</div>`,[{label:'Review & pay ₹87,420',primary:true,run:()=>modal.classList.remove('hidden')}]);}
-async function pay(){const btn=document.querySelector('#pay');btn.disabled=true;btn.textContent='Processing…';await new Promise(r=>setTimeout(r,900));const r=await fetch('/api/demo/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});booking=await r.json();modal.classList.add('hidden');btn.disabled=false;btn.textContent='Pay ₹87,420';user('Payment completed ✓');bot(`<h3>🎉 Booking confirmed!</h3>Your Dubai escape is booked.<br><br><b>Booking ID</b> · ${booking.bookingId}<br><b>Airline PNR</b> · ${booking.pnr}<br><b>Status</b> · Confirmed<div class="line">Your e-ticket and travel voucher are ready.</div>`,[{label:'↓ Download voucher',primary:true,run:voucher},{label:'View status',run:status},{label:'Cancel booking',run:cancel}],900)}
-function voucher(){const html=`VOYAGEZERO — E-TICKET & TRAVEL VOUCHER\n\nBooking: ${booking.bookingId}\nPNR: ${booking.pnr}\nStatus: CONFIRMED\n\nPassenger: Arjun Mehta\nFlight: Emirates DEL → DXB\nStay: Address Downtown, 10–15 October\nTransfer: DXB → Downtown Dubai\n\nSANDBOX DEMONSTRATION — NOT VALID FOR TRAVEL`;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/plain'}));a.download=`VoyageZero-${booking.pnr}-voucher.txt`;a.click();user('Downloaded my voucher');bot('Your voucher has been downloaded. In the connected version, this is a branded PDF delivered directly as a WhatsApp document.');}
-async function status(){user(`/status ${booking.bookingId}`);const r=await fetch(`/api/demo/status/${booking.bookingId}`),s=await r.json();bot(`<h3>Booking status</h3><b>${s.status==='CANCELLED'?'○':'✓'} ${s.status}</b><br>Booking · ${booking.bookingId}<br>PNR · ${s.pnr}`);}
-async function cancel(){user(`Cancel booking ${booking.bookingId}`);bot('This will cancel the itinerary and create a full test refund.',[{label:'Yes, cancel booking',run:async()=>{const r=await fetch(`/api/demo/cancel/${booking.bookingId}`,{method:'POST'}),s=await r.json();user('Yes, cancel booking');bot(`<h3>Booking cancelled</h3>Refund initiated · <b>${s.refund}</b><br>This was a test transaction; no real money moved.`)}}]);}
-function send(){const v=input.value.trim();if(!v)return;input.value='';user(v);if(!step){step=1;bot('I can demonstrate the full booking journey. Choose the guided Dubai trip below.',[{label:'Start guided demo',primary:true,run:search}])}else bot('For this presentation, use the quick-action buttons to continue the guided booking journey.');}
-document.querySelector('#send').onclick=send;input.onkeydown=e=>{if(e.key==='Enter')send()};document.querySelector('#restart').onclick=start;document.querySelector('#pay').onclick=pay;document.querySelector('#closePay').onclick=()=>modal.classList.add('hidden');modal.onclick=e=>{if(e.target===modal)modal.classList.add('hidden')};start();
+const chat=document.querySelector('#chat');
+const input=document.querySelector('#message');
+const activity=document.querySelector('#activity');
+const key='voyage-travel-demo-v1';
+let state;
+try{state=JSON.parse(localStorage.getItem(key))}catch{}
+if(!state||!/^demo-[a-zA-Z0-9-]{3,80}$/.test(state.userId)||!Array.isArray(state.messages))state={userId:`demo-${crypto.randomUUID()}`,messages:[]};
+let busy=false,enabled=false;
+function save(){try{localStorage.setItem(key,JSON.stringify(state))}catch{}}
+function bubble(text,who){const el=document.createElement('div');el.className=`msg ${who}`;const label=document.createElement('span');label.className='sender';label.textContent=who==='user'?'You':'Travel assistant';el.append(label,document.createTextNode(text));chat.append(el);chat.scrollTop=chat.scrollHeight;}
+function append(text,who){state.messages.push({text,who});state.messages=state.messages.slice(-100);save();bubble(text,who)}
+function lock(value){busy=value;document.querySelectorAll('button').forEach(b=>b.disabled=value||!enabled);input.disabled=value||!enabled;}
+async function send(text){
+  text=text.trim();if(!text||busy||!enabled)return;
+  const pending=state.pending;
+  if(pending&&pending.message!==text){activity.textContent='Retry your previous message first so the conversation stays in sync.';return}
+  if(!pending){state.pending={message:text,messageId:crypto.randomUUID()};append(text,'user')}
+  input.value='';lock(true);activity.classList.remove('error');activity.textContent='Your assistant is typing…';
+  try{
+    const response=await fetch('/api/demo/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:state.userId,...state.pending}),signal:AbortSignal.timeout(30000)});
+    const data=await response.json();if(!response.ok)throw new Error(data.error||'Unable to send message.');
+    delete state.pending;append(data.reply,'bot');activity.textContent='';
+  }catch(e){activity.classList.add('error');activity.textContent='Message not completed. Press Send to retry. '+(e.name==='TimeoutError'?'The request timed out.':e.message);input.value=text;save()}
+  finally{lock(false);input.focus()}
+}
+document.querySelector('#composer').addEventListener('submit',e=>{e.preventDefault();send(input.value)});
+input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();send(input.value)}});
+document.querySelectorAll('[data-message]').forEach(b=>b.addEventListener('click',()=>send(b.dataset.message)));
+document.querySelector('#reset').addEventListener('click',()=>send('/reset'));
+for(const m of state.messages)if(typeof m.text==='string')bubble(m.text,m.who==='user'?'user':'bot');
+if(!state.messages.length)append('Welcome! I can help you find flights, hotels and cabs, and save a demo booking. Where would you like to go?\n\nChoose an example or type your own request. No API keys or payment details needed.','bot');
+if(state.pending){input.value=state.pending.message;activity.textContent='Your last message needs a retry. Press Send to continue.'}
+lock(true);
+fetch('/api/demo/config').then(r=>{if(!r.ok)throw new Error();return r.json()}).then(c=>{enabled=c.demoMode;document.querySelectorAll('[data-brand]').forEach(el=>el.textContent=c.appName);document.title=c.appName+' · Travel assistant';lock(false);if(!enabled)activity.textContent='Browser preview is available with DEMO_MODE=true. Use WhatsApp for connected mode.'}).catch(()=>{activity.textContent='Unable to connect. Check that the server is running, then reload.';lock(false)});

@@ -9,7 +9,7 @@ export class MockProvider implements TravelProvider {
   async search(c:Criteria):Promise<Option[]> {
     return [0,1,2].map(i=>({id:`mock-${this.type}-${i}`,provider:'mock',type:this.type,mock:true,currency:'INR',
       name:this.type==='flight'?`Demo Airways ${101+i}`:this.type==='hotel'?`Demo ${['Comfort','Budget','Garden'][i]} Hotel`:`Demo ${['Sedan','Hatchback','SUV'][i]}`,
-      price:(this.type==='flight'?[4800,3600,5500]:this.type==='hotel'?[4200,2800,4800]:[650,450,900])[i]!*(this.type==='flight'?(c.passengers??1)*(c.returnDate?2:1):1),
+      price:(this.type==='flight'?[4800,3600,5500]:this.type==='hotel'?[4200,2800,4800]:[650,450,900])[i]!*(this.type==='flight'?(c.passengers??1)*(c.returnDate?2:1):this.type==='hotel'?(c.rooms??1):1),
       ...(this.type==='flight'?{origin:c.origin,destination:c.destination,departureTime:`${c.departureDate}T${[8,18,21][i]}:10:00`.replace('T8:','T08:'),arrivalTime:`${c.departureDate}T${[10,23,23][i]}:20:00`,duration:i===1?'5h 10m':'2h 10m',stops:i===1?1:0}:{}),
       ...(this.type==='hotel'?{location:[c.location,c.area].filter(Boolean).join(', '),checkIn:c.checkIn,checkOut:c.checkOut,rating:[4.5,3.8,4.2][i],amenities:['wifi','breakfast']}:{}),
       ...(this.type==='cab'?{pickup:c.pickup,destination:c.destination,vehicle:['Sedan','Hatchback','SUV'][i],estimatedArrival:'8 min',duration:'45 min'}:{})

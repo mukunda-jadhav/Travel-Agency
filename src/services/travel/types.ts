@@ -30,8 +30,8 @@ export interface Session {
   userId:string; travelType?:TravelType; intent?:Extraction['intent'];
   status:'idle'|'collecting_search_details'|'searching'|'awaiting_confirmation'|'collecting_booking_details'|'booked'|'cancelled';
   searchCriteria:Criteria; recommendedOption?:Option; alternatives:Option[]; bookingDetails:Extraction['details'];
-  pendingField?:keyof Criteria|'fullName'|'email'; approved?:boolean; bookingId?:string; lastUpdatedAt:string;
+  pendingCancellation?:string; pendingField?:keyof Criteria|'fullName'|'email'; approved?:boolean; bookingId?:string; lastUpdatedAt:string;
 }
-export interface DemoBooking { bookingId:string; type:TravelType; status:'confirmed_demo'; userId:string; selectedOption:Option; travelerDetails:Extraction['details']; createdAt:string }
+export interface DemoBooking { bookingId:string; type:TravelType; status:'confirmed_demo'|'cancelled_demo'; userId:string; selectedOption:Option; travelerDetails:Extraction['details']; createdAt:string }
 export interface Turn { session:Session; reply:string; booking?:DemoBooking }
 export const newSession=(userId:string,now=new Date()):Session=>({userId,status:'idle',searchCriteria:{},alternatives:[],bookingDetails:{},lastUpdatedAt:now.toISOString()});

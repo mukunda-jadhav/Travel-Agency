@@ -1,5 +1,27 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#075e54"><title>VoyageZero — WhatsApp Travel Concierge</title><link rel="stylesheet" href="./styles.css?v=3"></head>
-<body><main class="stage"><section class="pitch"><div class="brand"><span class="brandmark">V</span><div><b>VoyageZero</b><small>AI Travel Concierge</small></div></div><div class="eyebrow">LIVE PRODUCT DEMO</div><h1>One chat.<br><em>The whole journey.</em></h1><p>Search, compare, pay and receive travel documents in the familiar WhatsApp experience.</p><div class="features"><span>✦ AI itinerary</span><span>✈ Flight booking</span><span>⌂ Curated stays</span><span>↗ Smart cab routing</span></div><div class="proof"><div><strong>$0</strong><small>Demo transaction</small></div><div><strong>&lt;2 min</strong><small>Booking journey</small></div><div><strong>24/7</strong><small>AI assistance</small></div></div></section>
-<section class="phone-wrap"><div class="demo-label"><i></i> Interactive demo</div><div class="phone"><header><button class="back">‹</button><div class="avatar">V</div><div class="contact"><b>VoyageZero</b><span><i></i> online</span></div><button class="icon">⌕</button><button class="icon">⋮</button></header><div class="encryption">🔒 Messages are secured in this product demonstration</div><div id="chat" class="chat"></div><div id="typing" class="typing hidden"><span></span><span></span><span></span></div><footer><button class="plus">＋</button><div class="input"><input id="message" aria-label="Message" placeholder="Type a message"><button id="send">➤</button></div></footer></div><button id="restart" class="restart">↻ Restart demo</button></section></main>
-<div id="checkout" class="modal hidden"><div class="checkout"><button class="close" id="closePay">×</button><div class="stripe">stripe <small>TEST MODE</small></div><div class="merchant"><span class="brandmark small">V</span><div>Pay VoyageZero<strong>₹87,420</strong></div></div><div class="summary"><span>Dubai Escape · 5 nights</span><b>₹87,420</b></div><label>Email<input value="arjun@example.com"></label><label>Card information<div class="cardfields"><input value="4242 4242 4242 4242"><input value="12 / 30"><input value="123"></div></label><label>Name on card<input value="Arjun Mehta"></label><button id="pay" class="pay">Pay ₹87,420</button><p class="secure">🔒 Secure test payment · No money will be charged</p></div></div>
-<script src="./app.js?v=2"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#124e43"><title>VoyageZero · Travel assistant</title><link rel="stylesheet" href="/styles.css"></head>
+<body>
+<main class="workspace">
+  <aside class="guide">
+    <a class="brand" href="/"><span class="brandmark">V</span><span data-brand>VoyageZero</span></a>
+    <div class="intro"><p class="eyebrow">YOUR NEXT JOURNEY STARTS HERE</p><h1>A little chat.<br>A whole new <em>journey.</em></h1><p>Find a flight, a place to stay, or a ride. Your travel assistant takes care of the details, one message at a time.</p></div>
+    <section class="examples" aria-label="Start a travel request"><h2>Where shall we start?</h2>
+      <button data-message="Flight from Mumbai to Delhi tomorrow"><span class="number">01</span><span><b>Find a flight</b><small>Mumbai to Delhi · tomorrow</small></span><span aria-hidden="true">↗</span></button>
+      <button data-message="Hotel in Goa tomorrow for 2 nights under 5000"><span class="number">02</span><span><b>Find a stay</b><small>Goa · 2 nights · under ₹5,000 / night</small></span><span aria-hidden="true">↗</span></button>
+      <button data-message="Cab from Pune airport to Hinjewadi"><span class="number">03</span><span><b>Arrange a ride</b><small>Pune airport to Hinjewadi</small></span><span aria-hidden="true">↗</span></button>
+    </section>
+    <p class="disclaimer"><b>A safe place to try it out.</b> This demo uses sample availability and prices. It makes no real reservations and takes no payments.</p>
+  </aside>
+  <section class="messenger" aria-label="Travel conversation">
+    <header class="chat-header"><span class="avatar">V</span><div><h2 data-brand>VoyageZero</h2><p><span class="dot"></span> Travel assistant · Demo</p></div><button id="reset" class="text-button" title="Reset the search; keep your bookings">New search</button></header>
+    <div class="notice">WhatsApp-style preview · connected to your travel assistant</div>
+    <div id="chat" role="log" aria-live="polite" aria-label="Messages"></div>
+    <p id="activity" class="activity" role="status"></p>
+    <nav class="quick-actions" aria-label="Conversation actions"><button data-message="book it">Book it</button><button data-message="cheaper one">Cheaper option</button><button data-message="another">Another option</button><button data-message="/bookings">My bookings</button><button data-message="/help">Help</button></nav>
+    <form id="composer"><label for="message" class="sr-only">Your message</label><textarea id="message" rows="2" maxlength="4000" placeholder="Tell us where you’d like to go…" required></textarea><button id="send" type="submit">Send <span aria-hidden="true">↗</span></button></form>
+    <p class="composer-hint">Enter to send · Shift + Enter for a new line</p>
+  </section>
+</main>
+<script src="/app.js" defer></script>
+</body></html>
