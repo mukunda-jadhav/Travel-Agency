@@ -1,0 +1,12 @@
+ 1. Duffel Dashboard: request and obtain Stays API access.
+  2. Duffel Dashboard: complete business verification and apply for Live Mode when ready.
+  3. Google AI Studio: enable billing or increase the Gemini API quota.
+  4. Meta: generate a permanent WhatsApp access token; replace the temporary token in .env.
+  5. Meta: complete business verification and register your real business phone number.
+  6. Cloudflare: create a permanent named tunnel/domain to replace the temporary URL.
+  7. Stripe: complete account verification and configure the permanent production webhook.
+  8. Choose and obtain access to a real cab-booking provider/API.
+  9. Provide your business information: legal name, address, support email/phone, refund policy, terms, privacy policy,
+     and markup/commission rules.
+
+  10. Never share screenshots containing API tokens or secrets; rotate the previously exposed WhatsApp token.

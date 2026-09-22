@@ -1,0 +1,7 @@
+create extension if not exists pgcrypto;
+create table if not exists conversations (user_phone text primary key, state jsonb not null default '{}', messages jsonb not null default '[]', updated_at timestamptz not null default now());
+create table if not exists bookings (id uuid primary key default gen_random_uuid(), user_phone text not null, status text not null default 'DRAFT' check (status in ('DRAFT','PAYMENT_PENDING','PAID','CONFIRMED','CANCELLED','FAILED')), selected_offer_id text, offer_request_passenger_id text, flight_snapshot jsonb, hotel_snapshot jsonb, cab_snapshot jsonb, passengers jsonb not null default '[]', amount_minor integer not null default 0 check(amount_minor >= 0), currency text not null default 'USD', stripe_session_id text unique, duffel_order_id text, pnr text, voucher_url text, last_error text, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+create table if not exists webhook_events (provider text not null, event_id text not null, received_at timestamptz not null default now(), primary key(provider,event_id));
+create index if not exists bookings_phone_idx on bookings(user_phone,created_at desc);
+alter table conversations enable row level security; alter table bookings enable row level security; alter table webhook_events enable row level security;
+insert into storage.buckets(id,name,public) values ('vouchers','vouchers',true) on conflict(id) do update set public=true;
