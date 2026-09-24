@@ -5,6 +5,7 @@ import {
   messagesFrom,
   sendText,
   validMetaSignature,
+  safeErrorDetails,
 } from "../services/whatsapp.js";
 import { statusText } from "../agent.js";
 import { cancelBooking } from "../services/cancel.js";
@@ -27,6 +28,7 @@ function friendlyError(e: unknown) {
   return "That request could not be completed safely. Please try again, or simplify the request.";
 }
 async function processMessage(m: { id: string; from: string; text: string }) {
+  let stage = 'processing';
   try {
     const status = m.text.match(/^\/status\s+([0-9a-f-]{36})$/i);
     const cancel = m.text.match(
@@ -44,9 +46,13 @@ async function processMessage(m: { id: string; from: string; text: string }) {
         : !config.DEMO_MODE && cancel
           ? await cancelBooking(cancel[1]!, m.from)
           : await runTravelAssistant(m.from, m.text, m.id);
+    stage = 'sending';
     await sendText(m.from, reply);
+    console.log('WhatsApp reply accepted by Meta');
   } catch (e) {
-    console.error("WhatsApp message processing failed");
+    console.error("WhatsApp message failed", {stage,...safeErrorDetails(e)});
+    // Sending another message cannot repair a failed outbound connection.
+    if(stage === 'sending') return;
     await sendText(m.from, `Sorry, ${friendlyError(e)}`);
   }
 }
@@ -55,8 +61,8 @@ function enqueueMessage(m: { id: string; from: string; text: string }) {
   const next = prior
     .catch(() => undefined)
     .then(() => processMessage(m))
-    .catch(() => {
-      console.error("WhatsApp delivery failed");
+    .catch((e) => {
+      console.error("WhatsApp delivery failed", safeErrorDetails(e));
     })
     .finally(() => {
       if (userQueues.get(m.from) === next) userQueues.delete(m.from);
